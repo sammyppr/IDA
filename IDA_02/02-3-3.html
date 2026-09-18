@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function primenumber(n){
+            let i = 1;
+            while(i++ < n){
+                //document.write(i+","+n+"<br>")
+                if(n % i !=0){
+                    //document.write("割り切れない<br>");
+
+                } else {
+                    //document.write("割り切れる<br>");
+                    break;
+                }
+            }
+            if(i == n){
+                //document.write("素数！");
+                return 1;
+            } else {
+                //document.write("素数でない!");
+                return 0;
+            }
+        }
+        //document.write( primenumber(6));
+        function primenumberlist(n){
+            document.write(n+"までの素数は<br>");
+            for(let i=2;i<n;i++){
+                if(primenumber(i)==1){
+                    document.write(i+" ");
+                }
+            }
+            document.write("<br>です。");
+        }
+        primenumberlist(10000);
+    </script>
+</body>
+</html>

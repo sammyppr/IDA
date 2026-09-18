@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function primenumber(n){
+            let i = 1;
+            while(i++ < n){
+                document.write(i+","+n+"<br>")
+                if(n % i !=0){
+                    document.write("割り切れない<br>");
+
+                } else {
+                    document.write("割り切れる<br>");
+                    break;
+                }
+            }
+            if(i == n){
+                document.write("素数！");
+            } else {
+                document.write("素数でない!");
+            }
+        }
+        primenumber(5);
+    </script>
+</body>
+</html>

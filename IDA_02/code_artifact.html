@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>素数ジェネレーター (Prime Number Generator)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.5);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(107, 114, 128, 0.7);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-950/60 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-indigo-600/20 text-indigo-400 rounded-xl border border-indigo-500/30">
+                    <i data-lucide="binary" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                        素数ジェネレーター
+                    </h1>
+                    <p class="text-xs text-slate-400">指定された数値までの素数を高速に検出</p>
+                </div>
+            </div>
+            <div class="text-xs bg-slate-800 text-slate-300 px-3 py-1.5 rounded-full border border-slate-700 flex items-center gap-1.5">
+                <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span>エラトステネスの篩 アルゴリズム</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Controls Column -->
+        <section class="lg:col-span-5 space-y-6">
+            <!-- Input Card -->
+            <div class="bg-slate-800/60 rounded-2xl p-6 border border-slate-700/60 shadow-xl backdrop-blur-sm">
+                <h2 class="text-base font-semibold text-slate-200 mb-4 flex items-center gap-2">
+                    <i data-lucide="sliders" class="w-4 h-4 text-indigo-400"></i>
+                    計算条件の設定
+                </h2>
+
+                <form id="primeForm" onsubmit="handleCalculate(event)" class="space-y-5">
+                    <div>
+                        <label for="limitInput" class="block text-sm font-medium text-slate-300 mb-2">
+                            最大数値 <span class="text-xs text-slate-400">(N)</span>
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="number" 
+                                id="limitInput" 
+                                min="2" 
+                                max="10000000" 
+                                value="100" 
+                                required
+                                class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent code-font text-lg font-semibold"
+                                placeholder="例: 1000"
+                            />
+                            <div class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+                                Max: 1,000万
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preset Quick Buttons -->
+                    <div>
+                        <span class="block text-xs text-slate-400 mb-2">クイックプリセット:</span>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button type="button" onclick="setPreset(100)" class="px-3 py-1.5 text-xs bg-slate-700/60 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-600/50 transition">100</button>
+                            <button type="button" onclick="setPreset(1000)" class="px-3 py-1.5 text-xs bg-slate-700/60 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-600/50 transition">1,000</button>
+                            <button type="button" onclick="setPreset(10000)" class="px-3 py-1.5 text-xs bg-slate-700/60 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-600/50 transition">10,000</button>
+                            <button type="button" onclick="setPreset(100000)" class="px-3 py-1.5 text-xs bg-slate-700/60 hover:bg-slate-700 text-slate-300 rounded-lg border border-slate-600/50 transition">100,000</button>
+                        </div>
+                    </div>
+
+                    <!-- Calculate Button -->
+                    <button 
+                        type="submit" 
+                        id="calcBtn"
+                        class="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/25 active:scale-[0.98] transition flex items-center justify-center gap-2"
+                    >
+                        <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+                        <span>素数を計算する</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Stats Summary Card -->
+            <div class="bg-slate-800/60 rounded-2xl p-6 border border-slate-700/60 shadow-xl space-y-4">
+                <h3 class="text-sm font-semibold text-slate-300 flex items-center gap-2">
+                    <i data-lucide="pie-chart" class="w-4 h-4 text-purple-400"></i>
+                    計算統計データ
+                </h3>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                        <div class="text-xs text-slate-400 mb-1">発見された素数の数</div>
+                        <div id="statCount" class="text-2xl font-bold text-indigo-400 code-font">-</div>
+                    </div>
+                    <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                        <div class="text-xs text-slate-400 mb-1">計算処理時間</div>
+                        <div id="statTime" class="text-2xl font-bold text-emerald-400 code-font">-</div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                    <div class="flex justify-between items-center text-xs text-slate-400 mb-1.5">
+                        <span>素数の割合 (密度)</span>
+                        <span id="statDensityPercent" class="font-semibold text-slate-200 code-font">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div id="statDensityBar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-full w-0 transition-all duration-500"></div>
+                    </div>
+                    <p id="statDensityText" class="text-[11px] text-slate-500 mt-2">1 から N までの数に占める素数の割合</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Results Column -->
+        <section class="lg:col-span-7 flex flex-col h-full min-h-[500px]">
+            <div class="bg-slate-800/60 rounded-2xl border border-slate-700/60 shadow-xl flex flex-col flex-1 overflow-hidden">
+                
+                <!-- Result Controls Toolbar -->
+                <div class="p-4 border-b border-slate-700/60 flex flex-wrap items-center justify-between gap-3 bg-slate-900/40">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="list-numbers" class="w-5 h-5 text-indigo-400"></i>
+                        <h2 class="font-semibold text-slate-200">計算結果</h2>
+                        <span id="resultBadge" class="hidden text-xs bg-indigo-500/20 text-indigo-300 px-2.5 py-0.5 rounded-full border border-indigo-500/30">
+                            準備完了
+                        </span>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center gap-2">
+                        <!-- Display mode toggle -->
+                        <div class="bg-slate-900 p-1 rounded-lg border border-slate-700 flex text-xs">
+                            <button id="viewBadgeBtn" onclick="switchView('badges')" class="px-2.5 py-1 rounded-md text-slate-200 bg-slate-700 font-medium transition">
+                                タグ
+                            </button>
+                            <button id="viewTextBtn" onclick="switchView('text')" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-slate-200 font-medium transition">
+                                テキスト
+                            </button>
+                        </div>
+
+                        <!-- Copy Button -->
+                        <button 
+                            onclick="copyToClipboard()" 
+                            class="p-2 text-slate-300 hover:text-white bg-slate-700/50 hover:bg-slate-700 rounded-lg border border-slate-600/50 transition relative group"
+                            title="クリップボードにコピー"
+                        >
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        </button>
+
+                        <!-- Download Button -->
+                        <button 
+                            onclick="downloadCSV()" 
+                            class="p-2 text-slate-300 hover:text-white bg-slate-700/50 hover:bg-slate-700 rounded-lg border border-slate-600/50 transition relative group"
+                            title="TXTファイルでダウンロード"
+                        >
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Result Content Viewport -->
+                <div class="p-6 flex-1 overflow-y-auto max-h-[580px] relative">
+                    <!-- Initial Placeholder State -->
+                    <div id="placeholderState" class="h-full flex flex-col items-center justify-center text-center p-8 text-slate-500 space-y-3">
+                        <div class="p-4 rounded-full bg-slate-900/60 border border-slate-800 text-slate-600">
+                            <i data-lucide="calculator" class="w-10 h-10"></i>
+                        </div>
+                        <p class="text-sm">数字を入力して「素数を計算する」ボタンを押してください。</p>
+                    </div>
+
+                    <!-- Badges View -->
+                    <div id="badgesContainer" class="hidden flex flex-wrap gap-2 code-font text-sm"></div>
+
+                    <!-- Plain Text View -->
+                    <textarea 
+                        id="textViewContainer" 
+                        readonly 
+                        class="hidden w-full h-full min-h-[400px] bg-slate-950/80 border border-slate-800 rounded-xl p-4 text-emerald-400 code-font text-sm focus:outline-none resize-none leading-relaxed"
+                    ></textarea>
+                </div>
+
+                <!-- Bottom Bar / Search in Results -->
+                <div id="searchFooter" class="hidden border-t border-slate-700/60 p-3 bg-slate-900/40 flex items-center justify-between">
+                    <div class="relative w-full max-w-xs">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                        <input 
+                            type="number" 
+                            id="searchPrimeInput" 
+                            placeholder="結果から素数を検索..." 
+                            oninput="filterPrimes()"
+                            class="w-full bg-slate-900 text-xs text-slate-200 border border-slate-700 rounded-lg pl-9 pr-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                        />
+                    </div>
+                    <div id="searchResultCount" class="text-xs text-slate-400"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-800 border border-indigo-500/50 text-indigo-200 text-sm px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none z-50">
+        <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+        <span id="toastMsg">通知メッセージ</span>
+    </div>
+
+    <script>
+        // State variables
+        let computedPrimes = [];
+        let currentLimit = 0;
+        let activeView = 'badges'; // 'badges' | 'text'
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Preset button helper
+        function setPreset(val) {
+            document.getElementById('limitInput').value = val;
+        }
+
+        /**
+         * Fast Prime Generation using Sieve of Eratosthenes
+         * @param {number} n 
+         * @returns {number[]} Array of primes up to n
+         */
+        function sieveOfEratosthenes(n) {
+            if (n < 2) return [];
+            
+            // Uint8Array for high performance & low memory usage
+            const isPrime = new Uint8Array(n + 1);
+            isPrime.fill(1);
+            isPrime[0] = 0;
+            isPrime[1] = 0;
+
+            const limit = Math.sqrt(n);
+            for (let i = 2; i <= limit; i++) {
+                if (isPrime[i]) {
+                    for (let j = i * i; j <= n; j += i) {
+                        isPrime[j] = 0;
+                    }
+                }
+            }
+
+            const primes = [];
+            for (let i = 2; i <= n; i++) {
+                if (isPrime[i]) {
+                    primes.push(i);
+                }
+            }
+            return primes;
+        }
+
+        function handleCalculate(event) {
+            event.preventDefault();
+            const inputVal = parseInt(document.getElementById('limitInput').value, 10);
+
+            if (isNaN(inputVal) || inputVal < 2) {
+                showToast('2 以上の数字を入力してください');
+                return;
+            }
+
+            if (inputVal > 10000000) {
+                showToast('最大数値は10,000,000までに制限されています');
+                return;
+            }
+
+            currentLimit = inputVal;
+
+            // Start timer
+            const startTime = performance.now();
+            
+            // Execute algorithm
+            computedPrimes = sieveOfEratosthenes(inputVal);
+            
+            const endTime = performance.now();
+            const executionTimeMs = (endTime - startTime).toFixed(2);
+
+            // Update Statistics
+            updateStats(computedPrimes.length, executionTimeMs, inputVal);
+
+            // Render Results
+            renderResults();
+
+            // UI Adjustments
+            document.getElementById('placeholderState').classList.add('hidden');
+            document.getElementById('searchFooter').classList.remove('hidden');
+            document.getElementById('searchFooter').classList.add('flex');
+            
+            const badge = document.getElementById('resultBadge');
+            badge.classList.remove('hidden');
+            badge.textContent = `N = ${inputVal.toLocaleString()}`;
+        }
+
+        function updateStats(count, timeMs, limit) {
+            document.getElementById('statCount').textContent = count.toLocaleString() + ' 個';
+            document.getElementById('statTime').textContent = timeMs + ' ms';
+
+            const density = ((count / limit) * 100).toFixed(2);
+            document.getElementById('statDensityPercent').textContent = density + '%';
+            document.getElementById('statDensityBar').style.width = Math.min(density, 100) + '%';
+            document.getElementById('statDensityText').textContent = `${limit.toLocaleString()} までの数の中に ${density}% の素数が含まれます`;
+        }
+
+        function renderResults(filterQuery = '') {
+            const badgesContainer = document.getElementById('badgesContainer');
+            const textViewContainer = document.getElementById('textViewContainer');
+
+            let filteredPrimes = computedPrimes;
+            if (filterQuery !== '') {
+                filteredPrimes = computedPrimes.filter(p => p.toString().includes(filterQuery));
+            }
+
+            document.getElementById('searchResultCount').textContent = `該当: ${filteredPrimes.length.toLocaleString()} 件`;
+
+            // Limit DOM rendering for performance if result is massive (> 10,000 items in badges view)
+            if (activeView === 'badges') {
+                badgesContainer.innerHTML = '';
+                const maxBadgeRender = 5000;
+                
+                const renderList = filteredPrimes.slice(0, maxBadgeRender);
+                
+                const fragment = document.createDocumentFragment();
+                renderList.forEach(prime => {
+                    const span = document.createElement('span');
+                    span.className = 'px-2.5 py-1 bg-slate-900 hover:bg-indigo-950 text-indigo-300 hover:text-indigo-200 rounded-md border border-slate-700/80 hover:border-indigo-500/50 transition cursor-default';
+                    span.textContent = prime;
+                    fragment.appendChild(span);
+                });
+
+                if (filteredPrimes.length > maxBadgeRender) {
+                    const overflowNotice = document.createElement('div');
+                    overflowNotice.className = 'w-full text-xs text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 mt-2';
+                    overflowNotice.textContent = `※ 表示パフォーマンス保護のため、最初の ${maxBadgeRender.toLocaleString()} 個のみタグ表示しています。全件閲覧には「テキスト」ビューをご利用ください。`;
+                    fragment.appendChild(overflowNotice);
+                }
+
+                badgesContainer.appendChild(fragment);
+            } else {
+                textViewContainer.value = filteredPrimes.join(', ');
+            }
+        }
+
+        function switchView(view) {
+            activeView = view;
+            const badgeBtn = document.getElementById('viewBadgeBtn');
+            const textBtn = document.getElementById('viewTextBtn');
+            const badgesContainer = document.getElementById('badgesContainer');
+            const textViewContainer = document.getElementById('textViewContainer');
+
+            if (view === 'badges') {
+                badgeBtn.className = 'px-2.5 py-1 rounded-md text-slate-200 bg-slate-700 font-medium transition';
+                textBtn.className = 'px-2.5 py-1 rounded-md text-slate-400 hover:text-slate-200 font-medium transition';
+                badgesContainer.classList.remove('hidden');
+                textViewContainer.classList.add('hidden');
+            } else {
+                textBtn.className = 'px-2.5 py-1 rounded-md text-slate-200 bg-slate-700 font-medium transition';
+                badgeBtn.className = 'px-2.5 py-1 rounded-md text-slate-400 hover:text-slate-200 font-medium transition';
+                textViewContainer.classList.remove('hidden');
+                badgesContainer.classList.add('hidden');
+            }
+
+            if (computedPrimes.length > 0) {
+                renderResults(document.getElementById('searchPrimeInput').value);
+            }
+        }
+
+        function filterPrimes() {
+            const query = document.getElementById('searchPrimeInput').value.trim();
+            renderResults(query);
+        }
+
+        function copyToClipboard() {
+            if (computedPrimes.length === 0) {
+                showToast('コピーする素数データがありません');
+                return;
+            }
+            const textToCopy = computedPrimes.join(', ');
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast(`${computedPrimes.length.toLocaleString()} 個の素数をコピーしました！`);
+            }).catch(() => {
+                showToast('コピーに失敗しました');
+            });
+        }
+
+        function downloadCSV() {
+            if (computedPrimes.length === 0) {
+                showToast('ダウンロードする素数データがありません');
+                return;
+            }
+            const blob = new Blob([computedPrimes.join('\n')], { type: 'text/plain;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `primes_up_to_${currentLimit}.txt`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('ファイルをダウンロードしました');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.textContent = message;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Auto run on load for default value 100
+        window.addEventListener('DOMContentLoaded', () => {
+            handleCalculate(new Event('submit'));
+        });
+    </script>
+</body>
+</html>
