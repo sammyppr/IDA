@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        let ctx;
+        let cw;
+        let ch;
+        const loopNum = 10;
+
+        function init(){
+            let canvas = document.getElementById("mycanvas");
+            if(!canvas || !canvas.getContext){
+                return false;
+            }
+            
+            ctx = canvas.getContext("2d");
+            cw = canvas.width;
+            ch = canvas.height;
+            ctx.globalAlpha = 1;
+
+            draw();
+            setInterval("draw()",500);
+            console.log("'");
+            console.log('"');
+        }
+
+        function draw(){
+            ctx.fillStyle = "rgba(255,255,255,0.3)";
+            ctx.fillRect(0,0,cw,ch);
+            
+            for(let i=0; i<loopNum;i++){
+                ctx.strokeStyle = "rgba("+
+                    getRandomColor()+","+
+                    getRandomColor()+","+
+                    getRandomColor()+","+
+                    getRandomAlpha()+")";
+                ctx.fillStyle = "rgba("+
+                    getRandomColor()+","+
+                    getRandomColor()+","+
+                    getRandomColor()+","+
+                    getRandomAlpha()+")";
+
+                ctx.fillRect(
+                    getRandomNum(cw),
+                    getRandomNum(ch),
+                    getRandomNum(cw),
+                    getRandomNum(ch)
+                );
+                
+                ctx.beginPath();
+                ctx.moveTo(getRandomNum(cw),getRandomNum(ch));
+                ctx.lineTo(getRandomNum(cw),getRandomNum(ch));
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(getRandomNum(cw),getRandomNum(ch),getRandomNum(cw/2),0,360/180*Math.PI,true);
+                //ctx.stroke();
+                ctx.fill();
+
+            }
+        }
+
+        function getRandomNum(num){
+            return Math.floor(Math.random()*num);
+        }
+        function getRandomColor(){
+            return Math.floor(Math.random()*255);
+        }
+        function getRandomAlpha(){
+            return Math.random();
+        }
+
+    </script>
+</head>
+<body onload="init();">
+    <h1>Canvas Test</h1>
+    <canvas id="mycanvas" width="1000" height="800"></canvas>
+</body>
+</html>

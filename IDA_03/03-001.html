@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        let ctx;
+        let cw;
+        let ch;
+
+        function init(){
+            let canvas = document.getElementById("mycanvas");
+            if(!canvas || !canvas.getContext){
+                return false;
+            }
+            
+            ctx = canvas.getContext("2d");
+            cw = canvas.width;
+            ch = canvas.height;
+
+            draw();
+            console.log("'");
+            console.log('"');
+        }
+
+        function draw(){
+            ctx.fillRect(10,10,50,50);
+        }
+
+    </script>
+</head>
+<body onload="init();">
+    <h1>Canvas Test</h1>
+    <canvas id="mycanvas" width="1000" height="800"></canvas>
+</body>
+</html>
