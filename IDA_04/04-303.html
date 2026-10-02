@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        let ctx;
+        let cw;
+        let ch;
+
+        const density = 100;
+        let particles = [];
+
+        function init(){
+            let canvas = document.getElementById("mycanvas");
+            if(!canvas || !canvas.getContext){
+                return false;
+            }
+            
+            ctx = canvas.getContext("2d");
+            cw = canvas.width;
+            ch = canvas.height;
+
+            for(let i=0; i<density; i++){
+                particles[i] = new Particle(getRandomScale(), 
+                    "rgba("+getRandomColor()+
+                    ","+getRandomColor()+
+                    ","+getRandomColor()+
+                    ","+getRandomAlpha()+")"
+                    , 5, 1, 0.4);
+                particles[i].position.x = Math.random()*ch;
+                particles[i].position.y = Math.random()*cw;
+                particles[i].draw();
+            }
+
+            draw();
+            setInterval("draw()",33);
+        }
+
+        class Particle {
+            constructor(scale, color, vx, vy, gv){
+                this.scale = scale;
+                this.color = color;
+                this.vx = vx;
+                this.vy = vy;
+                this.gv = gv;
+                this.position = {
+                    x: 100,
+                    y: 100
+                }
+            }
+            draw(){
+                ctx.beginPath();
+                ctx.arc(this.position.x, this.position.y, this.scale, 0, 2*Math.PI, false);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+            update(){
+                this.vy += this.gv;
+                this.position.x += this.vx;
+                this.position.y += this.vy;
+                this.draw();
+                if(this.position.x > cw) this.position.x -= cw;
+                if(this.position.y > ch) this.vy = -this.vy;
+            }
+        }
+
+
+        function draw(){
+            ctx.fillStyle = "rgba(255,255,255,1)";
+            ctx.fillRect(0,0,cw,ch);
+
+            for(let i=0; i<density; i++){
+                particles[i].update();
+            }
+        }
+
+        function getRandomColor(){
+            return Math.floor(Math.random()*256);
+        }
+
+        function getRandomAlpha(){
+            return Math.random();
+        }
+        function getRandomScale(){
+            return (Math.random()*(8-3))+3;
+        }
+    </script>
+</head>
+<body onload="init();">
+    <h1>Canvas Test</h1>
+    <canvas id="mycanvas" width="1000" height="600"></canvas>
+</body>
+</html>

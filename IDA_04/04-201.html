@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        let ctx;
+        let cw;
+        let ch;
+
+
+        function init(){
+            let canvas = document.getElementById("mycanvas");
+            if(!canvas || !canvas.getContext){
+                return false;
+            }
+            
+            ctx = canvas.getContext("2d");
+            cw = canvas.width;
+            ch = canvas.height;
+
+            draw();
+            setInterval("draw()",33);
+        }
+
+        class Particle {
+            constructor(scale, color, speed){
+                this.scale = scale;
+                this.color = color;
+                this.speed = speed;
+                this.position = {
+                    x: 100,
+                    y:100
+                }
+            };
+            draw(){
+                ctx.beginPath();
+                ctx.arc(this.position.x, this.position.y, this.scale, 0, 2*Math.PI, false);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        let particle = new Particle(20, "#ff0000", 2);
+
+        function draw(){
+            ctx.fillStyle = "rgba(255,255,255,1)";
+            ctx.fillRect(0,0,cw,ch);
+
+            particle.position.x += particle.speed;
+            particle.draw();
+        }
+
+    </script>
+</head>
+<body onload="init();">
+    <h1>Canvas Test</h1>
+    <canvas id="mycanvas" width="1000" height="800"></canvas>
+</body>
+</html>

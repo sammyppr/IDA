@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        let ctx;
+        let cw;
+        let ch;
+
+        function init(){
+            let canvas = document.getElementById("mycanvas");
+            if(!canvas || !canvas.getContext){
+                return false;
+            }
+            
+            ctx = canvas.getContext("2d");
+            cw = canvas.width;
+            ch = canvas.height;
+
+            draw();
+            setInterval("draw()",33);
+        }
+
+        function draw(){
+            //画面をリセット
+            ctx.fillStyle = "rgba(255,255,255,0.3)";
+            ctx.fillRect(0,0,cw,ch);
+            
+            drawCircle(100,100,20,'#FF0000');
+        }
+
+        function drawCircle(x,y,scale,color){
+            ctx.beginPath();
+            ctx.arc(x,y,scale,0,2*Math.PI, false);
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+    </script>
+</head>
+<body onload="init();">
+    <h1>Canvas Test</h1>
+    <canvas id="mycanvas" width="1000" height="800"></canvas>
+</body>
+</html>
