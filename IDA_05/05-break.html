@@ -20,11 +20,15 @@
         let rot_y = new Array();
         let rot_z = new Array();
 
+        let timer_max = 100;
+        let timer = 0;
+
+
         function init(){
             //let rot = 0;
             //let mouseX = 0;
 
-            const CELL_NUM = 10;
+            const CELL_NUM = 30;
 
             //document.addEventListener("mousemove",(event)=>{
             //    mouseX = event.pageX;
@@ -59,9 +63,9 @@
                         );
 
                         meshes[i*CELL_NUM+j] = mesh;
-                        velocity_x[i*CELL_NUM+j] = Math.random()*10-5;
-                        velocity_y[i*CELL_NUM+j] = Math.random()*10-5;
-                        velocity_z[i*CELL_NUM+j] = Math.random()*10-5;
+                        velocity_x[i*CELL_NUM+j] = Math.random()*5-2.5;
+                        velocity_y[i*CELL_NUM+j] = Math.random()*5-2.5;
+                        velocity_z[i*CELL_NUM+j] = Math.random()*5-2.5;
                         rot_x[i*CELL_NUM+j] = Math.random()*.5 - .25;
                         rot_y[i*CELL_NUM+j] = Math.random()*.5 - .25;
                         rot_z[i*CELL_NUM+j] = Math.random()*.5 - .25;
@@ -101,43 +105,51 @@
 
             tick();
             function tick(){
-                /*
-                //box.rotation.y+= 0.01;
-                mesh.rotation.y += 0.01;
+                console.log(timer);
+                timer = timer + 1;
+                if((timer < timer_max) && (timer != 1) && (timer % 50 != 0)){
+                    console.log("hi");
 
-                const targetRot = (mouseX / window.innerWidth) * 360;
-                rot += (targetRot - rot) * 0.02;
-                const radian = rot * Math.PI / 180;
+                } else {
+                    /*
+                    //box.rotation.y+= 0.01;
+                    mesh.rotation.y += 0.01;
 
-                camera.position.x = 1000 * Math.sin(radian);
-                camera.position.z = 1000 * Math.cos(radian);
+                    const targetRot = (mouseX / window.innerWidth) * 360;
+                    rot += (targetRot - rot) * 0.02;
+                    const radian = rot * Math.PI / 180;
 
-                camera.lookAt(new THREE.Vector3(0,0,0));
+                    camera.position.x = 1000 * Math.sin(radian);
+                    camera.position.z = 1000 * Math.cos(radian);
 
-                renderer.render(scene, camera);
-                requestAnimationFrame(tick);
-                */
-                //container.rotation.x += Math.PI / 180;
-                //container.rotation.y += Math.PI / 180;
+                    camera.lookAt(new THREE.Vector3(0,0,0));
 
-                renderer.render(scene, camera);
+                    renderer.render(scene, camera);
+                    requestAnimationFrame(tick);
+                    */
+                    //container.rotation.x += Math.PI / 180;
+                    //container.rotation.y += Math.PI / 180;
 
-                document.getElementById('info').innerHTML = JSON.stringify(renderer.info.render, "", " ");
-                stats.update();
+                    renderer.render(scene, camera);
 
-                for(let i = 0; i < CELL_NUM; i++){
-                    for(let j = 0; j < CELL_NUM; j++){
-                        meshes[i*CELL_NUM+j].position.x += velocity_x[i*CELL_NUM+j];
-                        meshes[i*CELL_NUM+j].position.y += velocity_x[i*CELL_NUM+j];
-                        meshes[i*CELL_NUM+j].position.z += velocity_x[i*CELL_NUM+j];
-;                       meshes[i*CELL_NUM+j].rotation.x += rot_x[i*CELL_NUM+j];
-;                       meshes[i*CELL_NUM+j].rotation.y += rot_y[i*CELL_NUM+j];
-;                       meshes[i*CELL_NUM+j].rotation.z += rot_z[i*CELL_NUM+j];
+                    document.getElementById('info').innerHTML = JSON.stringify(renderer.info.render, "", " ");
+                    stats.update();
+
+                    for(let i = 0; i < CELL_NUM; i++){
+                        for(let j = 0; j < CELL_NUM; j++){
+                            meshes[i*CELL_NUM+j].position.x += velocity_x[i*CELL_NUM+j];
+                            meshes[i*CELL_NUM+j].position.y += velocity_y[i*CELL_NUM+j];
+                            meshes[i*CELL_NUM+j].position.z += velocity_z[i*CELL_NUM+j];
+    ;                       meshes[i*CELL_NUM+j].rotation.x += rot_x[i*CELL_NUM+j];
+    ;                       meshes[i*CELL_NUM+j].rotation.y += rot_y[i*CELL_NUM+j];
+    ;                       meshes[i*CELL_NUM+j].rotation.z += rot_z[i*CELL_NUM+j];
+                        }
                     }
                 }
 
 
-                requestAnimationFrame(tick);
+                    requestAnimationFrame(tick);
+
             }
         }
     </script>
