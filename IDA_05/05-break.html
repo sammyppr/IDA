@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/three@0.137.4/build/three.min.js"></script>
+    <script src="https://unpkg.com/stats.js@0.17.0/build/stats.min.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded',init);
+        const width = 960;
+        const height = 540;
+
+        const interval = 20;
+
+        let meshes = new Array();
+        let velocity_x = new Array();
+        let velocity_y = new Array();
+        let velocity_z = new Array();
+        let rot_x = new Array();
+        let rot_y = new Array();
+        let rot_z = new Array();
+
+        function init(){
+            //let rot = 0;
+            //let mouseX = 0;
+
+            const CELL_NUM = 10;
+
+            //document.addEventListener("mousemove",(event)=>{
+            //    mouseX = event.pageX;
+            //})
+
+            const renderer = new THREE.WebGLRenderer({
+                canvas: document.querySelector('#myCanvas'),
+            });
+            console.log("hi");
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(width, height);
+
+            const scene = new THREE.Scene();
+
+            const camera = new THREE.PerspectiveCamera(45, width/height);
+            camera.position.set(0,0, +1000);
+
+            const container = new THREE.Group();
+            scene.add(container);
+
+            const material = new THREE.MeshNormalMaterial();
+            for(let i = 0; i < CELL_NUM; i++){
+                for(let j = 0; j < CELL_NUM; j++){
+                    //for(let k = 0; k < CELL_NUM; k++){
+                        const mesh = new THREE.Mesh(new THREE.BoxGeometry(interval,interval,interval), material);
+
+                        mesh.position.set(
+                            interval * (i- CELL_NUM/2),
+                            interval * (j - CELL_NUM/2),
+                            //interval * (k - CELL_NUM/2)
+                            0
+                        );
+
+                        meshes[i*CELL_NUM+j] = mesh;
+                        velocity_x[i*CELL_NUM+j] = Math.random()*10-5;
+                        velocity_y[i*CELL_NUM+j] = Math.random()*10-5;
+                        velocity_z[i*CELL_NUM+j] = Math.random()*10-5;
+                        rot_x[i*CELL_NUM+j] = Math.random()*.5 - .25;
+                        rot_y[i*CELL_NUM+j] = Math.random()*.5 - .25;
+                        rot_z[i*CELL_NUM+j] = Math.random()*.5 - .25;
+                        container.add(mesh);
+
+                    //}
+                }
+            }
+            /*
+            const geometry = new THREE.BoxGeometry(400,400,400);
+            const material = new THREE.MeshNormalMaterial()
+            const box = new THREE.Mesh(geometry, material);
+            scene.add(box);
+            */
+
+            /*
+            const geometry = new THREE.SphereGeometry(300,30,30);
+            const loader = new THREE.TextureLoader();
+            const texture = loader.load('img/earthmap1k.jpg');
+            //const material = new THREE.MeshStandardMaterial({color: 0xff0000});
+            const material = new THREE.MeshStandardMaterial({
+                map: texture,
+            })
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+            */
+            /*
+            const directionlLight = new THREE.DirectionalLight(0xffffff);
+            directionlLight.position.set(1,1,1);
+            scene.add(directionlLight);
+            */
+
+            const stats = new Stats();
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.top = '0px';
+            document.body.appendChild(stats.domElement);
+
+            tick();
+            function tick(){
+                /*
+                //box.rotation.y+= 0.01;
+                mesh.rotation.y += 0.01;
+
+                const targetRot = (mouseX / window.innerWidth) * 360;
+                rot += (targetRot - rot) * 0.02;
+                const radian = rot * Math.PI / 180;
+
+                camera.position.x = 1000 * Math.sin(radian);
+                camera.position.z = 1000 * Math.cos(radian);
+
+                camera.lookAt(new THREE.Vector3(0,0,0));
+
+                renderer.render(scene, camera);
+                requestAnimationFrame(tick);
+                */
+                //container.rotation.x += Math.PI / 180;
+                //container.rotation.y += Math.PI / 180;
+
+                renderer.render(scene, camera);
+
+                document.getElementById('info').innerHTML = JSON.stringify(renderer.info.render, "", " ");
+                stats.update();
+
+                for(let i = 0; i < CELL_NUM; i++){
+                    for(let j = 0; j < CELL_NUM; j++){
+                        meshes[i*CELL_NUM+j].position.x += velocity_x[i*CELL_NUM+j];
+                        meshes[i*CELL_NUM+j].position.y += velocity_x[i*CELL_NUM+j];
+                        meshes[i*CELL_NUM+j].position.z += velocity_x[i*CELL_NUM+j];
+;                       meshes[i*CELL_NUM+j].rotation.x += rot_x[i*CELL_NUM+j];
+;                       meshes[i*CELL_NUM+j].rotation.y += rot_y[i*CELL_NUM+j];
+;                       meshes[i*CELL_NUM+j].rotation.z += rot_z[i*CELL_NUM+j];
+                    }
+                }
+
+
+                requestAnimationFrame(tick);
+            }
+        }
+    </script>
+    <title>Document</title>
+</head>
+<body>
+    <h1>05-31.html</h1>
+    <canvas id="myCanvas"></canvas>
+    <pre id="info"></pre>
+</body>
+</html>
