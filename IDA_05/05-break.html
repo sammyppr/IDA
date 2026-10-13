@@ -53,7 +53,7 @@
             for(let i = 0; i < CELL_NUM; i++){
                 for(let j = 0; j < CELL_NUM; j++){
                     //for(let k = 0; k < CELL_NUM; k++){
-                        const mesh = new THREE.Mesh(new THREE.BoxGeometry(interval,interval,interval), material);
+                        const mesh = new THREE.Mesh(new THREE.BoxGeometry(interval,interval,1), material);
 
                         mesh.position.set(
                             interval * (i- CELL_NUM/2),
