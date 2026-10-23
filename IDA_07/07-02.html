@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #container {
+            position: relative;
+        }
+        #video {
+            transform: scaleX(-1);
+        }
+        #canvas {
+            transform: scaleX(-1);
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <video id="video" width="400" height="300" autoplay></video>
+        <canvas id="canvas" width="400" height="300"></canvas>
+    </div>
+    <script src="js/clmtrackr.js"></script>
+    <script src="js/model_pca_20_svm.js"></script>
+    <script>
+        var video = document.getElementById("video");
+        var canvas = document.getElementById("canvas");
+        var context = canvas.getContext("2d");
+
+        var media = navigator.mediaDevices.getUserMedia({
+            video: {facingMode: "user"},
+            audio: false
+        });
+        media.then((stream) => {
+            video.srcObject = stream;
+        });
+
+        var tracker = new clm.tracker();
+        tracker.init(pModel);
+        tracker.start(video);
+
+        function drawLoop() {
+            requestAnimationFrame(drawLoop);
+            var positions = tracker.getCurrentPosition();
+            context.clearRect(0,0,canvas.width, canvas.height);
+            tracker.draw(canvas);
+        }
+        drawLoop();
+    </script>
+
+</body>
+</html>

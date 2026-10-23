@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #container {
+            position: relative;
+        }
+        #video {
+            transform: scaleX(-1);
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <video id="video" width="400" height="300" autoplay></video>
+    </div>
+    <script>
+        var video = document.getElementById("video");
+        var media = navigator.mediaDevices.getUserMedia({
+            video: {facingMode: "user"},
+            audio: false
+        });
+        media.then((stream) => {
+            video.srcObject = stream;
+        });
+    </script>
+
+</body>
+</html>
