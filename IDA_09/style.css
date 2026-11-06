@@ -1,0 +1,53 @@
+:root {
+    --primary-color: green;
+    --secondary-color: red;
+}
+html {
+    scroll-behavior: smooth;
+    box-sizing: border-box;
+}
+h1 {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+h1#top {
+    border: 1px solid red;
+}
+p.boy {
+    color: var(--primary-color);
+}
+p.girl {
+    color: red;
+    text-align: right;
+}
+img.hello {
+    width: 50%;
+    border: 10px solid blue;
+    padding: 100px;
+    margin: 30px;
+}
+
+
+@media (600px <= width < 800px){
+    p {
+        color: purple;
+    }
+}
+
+/* Type 1 */
+div.type1{
+    h3 {
+        border-bottom: 1px solid black;
+    }
+    p {
+        color: pink;
+    }
+}
+div.type2{
+    h3 {
+        border-bottom: 1px solid purple;
+    }
+    p {
+        color: purple;
+    }
+}

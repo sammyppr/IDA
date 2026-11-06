@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML in Canvas</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+        div#card {
+            background-color: gray;
+            border: 1px solid black;
+            border-radius: 10px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body >
+
+<canvas id="canvas" width="280" height="200" content="drawable">
+    <div id="card" drawable>
+        <p>Canvasに描くカード</p>
+        <button>クリック 0</button>
+        <input type="text" placeholder="入力もできます" />
+    </div>
+</canvas>
+ 
+<script>
+    const canvas = document.querySelector('#canvas');
+    const card = document.querySelector('#card');
+    const ctx = canvas.getContext("2d");
+
+    canvas.addEventListener("paint",() => {
+        ctx.reset();
+        ctx.translate(40,40);
+        ctx.rotate(Math.PI /12);
+        ctx.drawElementImage(card,0,0);
+    })
+
+    canvas.requestPaint();
+
+
+</script>
+
+</body>
+</html>

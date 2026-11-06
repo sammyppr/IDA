@@ -1,0 +1,260 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTML in Canvas - WebGL Card</title>
+
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: #151927;
+    color: white;
+    font-family: sans-serif;
+  }
+
+  canvas {
+    width: 100vw;
+    height: 100vh;
+    display: block;
+  }
+
+  /* Canvas内に描画するHTMLカード */
+  .card {
+    width: 300px;
+    height: 420px;
+    padding: 30px;
+    border-radius: 24px;
+    background: linear-gradient(145deg, #f39800, #e65c00);
+    color: white;
+    box-shadow: 0 15px 40px #0005;
+  }
+
+  .card small {
+    letter-spacing: 3px;
+    font-size: 12px;
+  }
+
+  .card h1 {
+    font-size: 38px;
+    margin-top: 70px;
+    line-height: 1.2;
+  }
+
+  .card p {
+    font-size: 16px;
+    line-height: 1.8;
+  }
+
+  .card .number {
+    margin-top: 55px;
+    font-size: 48px;
+    font-weight: bold;
+  }
+</style>
+</head>
+
+<body>
+
+<canvas id="glcanvas" content="drawable">
+  <div id="card" class="card" drawable>
+    <small>HTML IN CANVAS</small>
+    <h1>Creative<br>Technology</h1>
+    <p>
+      HTMLで作ったカードを<br>
+      WebGLの3D空間に配置する。
+    </p>
+    <div class="number">2026</div>
+  </div>
+</canvas>
+
+<script>
+const canvas = document.getElementById("glcanvas");
+const card = document.getElementById("card");
+const gl = canvas.getContext("webgl2");
+
+if (!gl || typeof gl.texElementSubImage2D !== "function") {
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    "<p>このブラウザはHTML-in-CanvasのWebGL機能に対応していません。</p>"
+  );
+  throw new Error("HTML-in-Canvas WebGL is not supported");
+}
+
+// シェーダー
+const vs = `#version 300 es
+in vec3 position;
+in vec2 uv;
+uniform mat4 matrix;
+out vec2 vUv;
+
+void main() {
+  gl_Position = matrix * vec4(position, 1.0);
+  vUv = uv;
+}`;
+
+const fs = `#version 300 es
+precision mediump float;
+in vec2 vUv;
+uniform sampler2D tex;
+out vec4 color;
+
+void main() {
+  color = texture(tex, vUv);
+}`;
+
+function shader(type, source) {
+  const s = gl.createShader(type);
+  gl.shaderSource(s, source);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+    throw new Error(gl.getShaderInfoLog(s));
+  }
+  return s;
+}
+
+const program = gl.createProgram();
+gl.attachShader(program, shader(gl.VERTEX_SHADER, vs));
+gl.attachShader(program, shader(gl.FRAGMENT_SHADER, fs));
+gl.linkProgram(program);
+
+if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+  throw new Error(gl.getProgramInfoLog(program));
+}
+
+gl.useProgram(program);
+
+// カードの四角形
+const vertices = new Float32Array([
+  -1, -1, 0,  0, 1,
+   1, -1, 0,  1, 1,
+  -1,  1, 0,  0, 0,
+   1,  1, 0,  1, 0
+]);
+
+const buffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+const stride = 5 * 4;
+
+const pos = gl.getAttribLocation(program, "position");
+gl.enableVertexAttribArray(pos);
+gl.vertexAttribPointer(pos, 3, gl.FLOAT, false, stride, 0);
+
+const uv = gl.getAttribLocation(program, "uv");
+gl.enableVertexAttribArray(uv);
+gl.vertexAttribPointer(uv, 2, gl.FLOAT, false, stride, 12);
+
+// HTMLを読み込むテクスチャ
+const texture = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, texture);
+
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+// HTML要素のサイズでGPUメモリを確保
+const texWidth = 300;
+const texHeight = 420;
+
+gl.texImage2D(
+  gl.TEXTURE_2D, 0, gl.RGBA8,
+  texWidth, texHeight, 0,
+  gl.RGBA, gl.UNSIGNED_BYTE, null
+);
+
+gl.uniform1i(gl.getUniformLocation(program, "tex"), 0);
+
+// 行列計算
+function perspective(fov, aspect, near, far) {
+  const f = 1 / Math.tan(fov / 2);
+  return new Float32Array([
+    f/aspect, 0, 0, 0,
+    0, f, 0, 0,
+    0, 0, (far+near)/(near-far), -1,
+    0, 0, (2*far*near)/(near-far), 0
+  ]);
+}
+
+function rotateY(a) {
+  const c = Math.cos(a);
+  const s = Math.sin(a);
+  return new Float32Array([
+     c, 0, -s, 0,
+     0, 1,  0, 0,
+     s, 0,  c, 0,
+     0, 0, -4, 1
+  ]);
+}
+
+function multiply(a, b) {
+  const out = new Float32Array(16);
+  for (let c=0; c<4; c++) {
+    for (let r=0; r<4; r++) {
+      for (let k=0; k<4; k++) {
+        out[c*4+r] += a[k*4+r] * b[c*4+k];
+      }
+    }
+  }
+  return out;
+}
+
+let angle = 0;
+
+function resize() {
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(canvas.clientWidth * dpr);
+  canvas.height = Math.round(canvas.clientHeight * dpr);
+}
+
+new ResizeObserver(resize).observe(canvas);
+resize();
+
+// 描画
+canvas.addEventListener("paint", () => {
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.clearColor(0.08, 0.10, 0.16, 1);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  // HTMLをGPUテクスチャに転送
+  gl.activeTexture(gl.TEXTURE0);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  gl.texElementSubImage2D(
+    gl.TEXTURE_2D, 0, 0, 0, card
+  );
+
+  // 3D回転
+  const projection = perspective(
+    Math.PI / 4,
+    canvas.width / canvas.height,
+    0.1, 100
+  );
+
+  const model = rotateY(angle);
+  const matrix = multiply(projection, model);
+
+  gl.uniformMatrix4fv(
+    gl.getUniformLocation(program, "matrix"),
+    false,
+    matrix
+  );
+
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+  // 次のフレームを要求
+  angle += 0.015;
+  canvas.requestPaint();
+});
+
+// 最初の描画
+canvas.requestPaint();
+
+</script>
+</body>
+</html>
